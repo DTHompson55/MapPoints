@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>MQTT Map Prepopulate</title>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<script type="text/javascript"
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular.min.js"></script>
+
+<script type="text/javascript">
+	var app = angular.module('mapHelper', []); // dependencies
+</script>
+
+<script type="text/javascript" src="mqttws31.js">
+	
+</script>
+
+
+
+
+<script type="text/javascript">
+
+var msgs = [
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.15085772974394E+1,\"lng\":-7.24603271484375E+1,\"time\":1418843552412}",
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.15784705844344E+1,\"lng\":-7.2740478515625E+1,\"time\":1418843667215}",
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.15990130548302E+1,\"lng\":-7.31414794921875E+1,\"time\":1418844313019}",
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.15825796014303E+1,\"lng\":-7.3289794921875E+1,\"time\":1418844333048}",
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.15332541428132E+1,\"lng\":-7.2147216796875E+1,\"time\":1418845791304}",
+			"{\"type\":\"marker\",\"id\":\"User_54\",\"lat\":4.20248136078178E+1,\"lng\":-7.156494140625E+1,\"time\":1418851133401}",
+			"{\"type\":\"marker\",\"id\":\"User_1\",\"lat\":4.16400783846789E+1,\"lng\":-7.2872314453125E+1,\"time\":1418856603371}",
+			"{\"type\":\"marker\",\"id\":\"User_20\",\"lat\":4.17180304600481E+1,\"lng\":-7.2674560546875E+1,\"time\":1418860826085}",
+			"{\"type\":\"marker\",\"id\":\"User_20\",\"lat\":4.18777414510968E+1,\"lng\":-7.283935546875E+1,\"time\":1418920878183}",
+			"{\"type\":\"marker\",\"id\":\"User_63\",\"lat\":4.16770148220322E+1,\"lng\":-7.2421875E+1,\"time\":1418934309221}",
+			"{\"type\":\"marker\",\"id\":\"User_93\",\"lat\":4.18777414510968E+1,\"lng\":-7.25921630859375E+1,\"time\":1418934383504}",
+			"{\"type\":\"marker\",\"id\":\"User_93\",\"lat\":4.16934242161513E+1,\"lng\":-7.218017578125E+1,\"time\":1418934384848}",
+			"{\"type\":\"marker\",\"id\":\"User_93\",\"lat\":4.16277615314434E+1,\"lng\":-7.270751953125E+1,\"time\":1418934386117}",
+			"{\"type\":\"marker\",\"id\":\"User_63\",\"lat\":4.16482883125953E+1,\"lng\":-7.2564697265625E+1,\"time\":1418935977312}",
+			"{\"type\":\"marker\",\"id\":\"User_79\",\"lat\":4.17057285152375E+1,\"lng\":-7.2652587890625E+1,\"time\":1418969196884}",
+			"{\"type\":\"marker\",\"id\":\"User_79\",\"lat\":4.1943148747327E+1,\"lng\":-7.2169189453125E+1,\"time\":1418969198615}",
+			"{\"type\":\"marker\",\"id\":\"User_79\",\"lat\":4.14921208396878E+1,\"lng\":-7.3201904296875E+1,\"time\":1418969200247}",
+			"{\"type\":\"marker\",\"id\":\"User_71\",\"lat\":4.14344903089492E+1,\"lng\":-7.13507080078125E+1,\"time\":1418969223041}",
+			"{\"type\":\"marker\",\"id\":\"User_71\",\"lat\":4.24518346694392E+1,\"lng\":-7.18780517578125E+1,\"time\":1418969224554}",
+			"{\"type\":\"marker\",\"id\":\"User_71\",\"lat\":4.31611158676596E+1,\"lng\":-7.15869140625E+1,\"time\":1418969228080}",
+			"{\"type\":\"marker\",\"id\":\"User_36\",\"lat\":4.1697525910759E+1,\"lng\":-7.283935546875E+1,\"time\":1418969239183}",
+			"{\"type\":\"marker\",\"id\":\"User_36\",\"lat\":4.18491046861039E+1,\"lng\":-7.20758056640625E+1,\"time\":1418969240748}",
+			"{\"type\":\"marker\",\"id\":\"User_36\",\"lat\":4.19390627548486E+1,\"lng\":-7.1455078125E+1,\"time\":1418969241833}",
+			"{\"type\":\"marker\",\"id\":\"User_3\",\"lat\":4.23504251224346E+1,\"lng\":-7.16143798828125E+1,\"time\":1418993840135}",
+			"{\"type\":\"marker\",\"id\":\"User_3\",\"lat\":4.22610491621139E+1,\"lng\":-7.16363525390625E+1,\"time\":1418993909288}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.16657720119642E+1,\"lng\":-7.27903015119955E+1,\"time\":1418862387919}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.16657720119642E+1,\"lng\":-7.27903015119955E+1,\"time\":1418862387922}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.13703780108799E+1,\"lng\":-7.21056335885078E+1,\"time\":1418862408158}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.13703780108799E+1,\"lng\":-7.21056335885078E+1,\"time\":1418862408160}",
+			"{\"type\":\"marker\",\"id\":\"User_42\",\"lat\":4.19390627548486E+1,\"lng\":-7.31689453125E+1,\"time\":1418995260161}",
+			"{\"type\":\"marker\",\"id\":\"User_42\",\"lat\":4.17876970053906E+1,\"lng\":-7.30426025390625E+1,\"time\":1418995261195}",
+			"{\"type\":\"marker\",\"id\":\"User_42\",\"lat\":4.18531964377667E+1,\"lng\":-7.270751953125E+1,\"time\":1418995311643}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.23755494027182E+1,\"lng\":-7.25078979693353E+1,\"time\":1418862868532}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.23755494027182E+1,\"lng\":-7.25078979693353E+1,\"time\":1418862868538}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.18389151271906E+1,\"lng\":-7.20901428256184E+1,\"time\":1418862871503}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.18389151271906E+1,\"lng\":-7.20901428256184E+1,\"time\":1418862871506}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.18821176850154E+1,\"lng\":-7.27709655929357E+1,\"time\":1418862873050}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.18821176850154E+1,\"lng\":-7.27709655929357E+1,\"time\":1418862873053}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.16628993859836E+1,\"lng\":-7.27825561724603E+1,\"time\":1418862875548}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.16628993859836E+1,\"lng\":-7.27825561724603E+1,\"time\":1418862875549}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.15935083289668E+1,\"lng\":-7.20708069484681E+1,\"time\":1418862877181}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.15935083289668E+1,\"lng\":-7.20708069484681E+1,\"time\":1418862877184}",
+			"{\"type\":\"marker\",\"id\":\"User_31\",\"lat\":4.1894099558114E+1,\"lng\":-7.23394775390625E+1,\"time\":1418995366709}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.19357936975297E+1,\"lng\":-7.3092041015625E+1,\"time\":1418995369195}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":4.30729005814932E+1,\"lng\":-7.6168212890625E+1,\"time\":1418995374711}",
+			"{\"type\":\"marker\",\"id\":\"User_81\",\"lat\":4.24112905190282E+1,\"lng\":-7.119140625E+1,\"time\":1418995408783}",
+			"{\"type\":\"marker\",\"id\":\"User_81\",\"lat\":4.23341843859394E+1,\"lng\":-7.1290283203125E+1,\"time\":1418995411300}",
+			"{\"type\":\"marker\",\"id\":\"User_81\",\"lat\":4.24234565179383E+1,\"lng\":-7.14276123046875E+1,\"time\":1418995411816}",
+			"{\"type\":\"marker\",\"id\":\"User_81\",\"lat\":4.22325847493133E+1,\"lng\":-7.1444091796875E+1,\"time\":1418995412321}",
+			"{\"type\":\"marker\",\"id\":\"User_81\",\"lat\":4.20982224111897E+1,\"lng\":-7.1180419921875E+1,\"time\":1418995412877}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.2330123546342E+1,\"lng\":-7.1048583984375E+1,\"time\":1418995393461}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.22000382660468E+1,\"lng\":-7.10870361328125E+1,\"time\":1418995393980}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":4.46725593921204E+1,\"lng\":-7.5487060546875E+1,\"time\":1418995394512}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.17836010664808E+1,\"lng\":-7.14495849609375E+1,\"time\":1418995394464}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.19880773830916E+1,\"lng\":-7.1312255859375E+1,\"time\":1418995395170}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":1.68466051063963E+1,\"lng\":-9.98876953125E+1,\"time\":1418995425325}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":3.89252290471405E+1,\"lng\":-9.4482421875E+1,\"time\":1418995530694}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.16995766599716E+1,\"lng\":-7.29294433258474E+1,\"time\":1418995532486}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.2038278222967E+1,\"lng\":-7.39401855133474E+1,\"time\":1418995533225}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.21438561584721E+1,\"lng\":-7.31252745911479E+1,\"time\":1418995534224}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.19104534766642E+1,\"lng\":-7.34271240234375E+1,\"time\":1418995533954}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.19635747822252E+1,\"lng\":-7.33680725097656E+1,\"time\":1418995535374}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.26985858916984E+1,\"lng\":-7.25152587890625E+1,\"time\":1418995534372}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.19635747822252E+1,\"lng\":-7.33680725097656E+1,\"time\":1418995535721}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.1799983252074E+1,\"lng\":-7.26251220703125E+1,\"time\":1418995534827}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.15126907584586E+1,\"lng\":-7.32293701171875E+1,\"time\":1418995535356}",
+			"{\"type\":\"marker\",\"id\":\"User_75\",\"lat\":4.18523780896429E+1,\"lng\":-7.35987854003906E+1,\"time\":1418995536535}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.22854370074915E+1,\"lng\":-7.28558349609375E+1,\"time\":1418995535830}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.22569836037675E+1,\"lng\":-7.2081298828125E+1,\"time\":1418995536278}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.17467258417694E+1,\"lng\":-7.2169189453125E+1,\"time\":1418995536806}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.19880773830916E+1,\"lng\":-7.14166259765625E+1,\"time\":1418995537295}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.25166507536114E+1,\"lng\":-7.14166259765625E+1,\"time\":1418995537828}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.10130657870063E+1,\"lng\":-7.576171875E+1,\"time\":1418995552870}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":-2.7371767300523E+1,\"lng\":1.34296875E+2,\"time\":1418995553071}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":4.10130657870063E+1,\"lng\":-7.83984375E+1,\"time\":1418995553351}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":3.8908132995967E+1,\"lng\":-7.881591796875E+1,\"time\":1418995553937}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":3.61733569352216E+1,\"lng\":-7.894775390625E+1,\"time\":1418995554521}",
+			"{\"type\":\"marker\",\"id\":\"User_38\",\"lat\":3.4016241889667E+1,\"lng\":-8.033203125E+1,\"time\":1418995555218}",
+			"{\"type\":\"marker\",\"id\":\"User_10\",\"lat\":4.16893222599704E+1,\"lng\":-6.6785888671875E+1,\"time\":1418995570282}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.19247597193397E+1,\"lng\":-6.81836791522801E+1,\"time\":1418863150094}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":4.19247597193397E+1,\"lng\":-6.81836791522801E+1,\"time\":1418863150096}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":3.28766343060022E+1,\"lng\":-4.60792994499207E+1,\"time\":1418863179792}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":3.28766343060022E+1,\"lng\":-4.60792994499207E+1,\"time\":1418863179796}",
+			"{\"type\":\"marker\",\"id\":\"User_28\",\"lat\":7.17464317190415E+1,\"lng\":9.87890625E+1,\"time\":1418995636761}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":1.15884233560894E+1,\"lng\":1.04846374411136E+2,\"time\":1418863386436}",
+			"{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":1.15884233560894E+1,\"lng\":1.04846374411136E+2,\"time\":1418863386438}"
+	];
+	
+	function initialize() {
+		var hostname = "localhost";
+		var port = "8001";
+
+		console.log("initializing");
+		
+		client = new Paho.MQTT.Client(hostname, Number(port), "Prep1");
+		client.onConnectionLost = onConnectionLost;
+		client.onMessageArrived = onMessageArrived;
+		client.connect({
+			onSuccess : onConnect
+		});
+		
+	}
+		function onConnect() {
+			// Once a connection has been made, make a subscription and send a message.
+			console.log("onConnect");
+//			client.subscribe("/World");
+		}
+		;
+		
+		function onConnectionLost(responseObject) {
+			if (responseObject.errorCode !== 0)
+				console.log("onConnectionLost:" + responseObject.errorMessage);
+		}
+		;
+		function onMessageArrived(message) {
+				console.log("onMessageArrived:" + message.payloadString);
+		}
+
+		function populate(){
+			var i = 0;
+			console.log("Number of msgs = "+ msgs.length);
+			while ( i < msgs.length){
+				console.log("Number of msgs = "+i+" "+ msgs[i]);
+				sendMsg(msgs[i]);
+    	   		sendMsg("{\"type\":\"marker\",\"id\":\"User_26\",\"lat\":1.15884233560894E+1,\"lng\":1.04846374411136E+2,\"time\":1418863386438}");
+				i++;
+			}
+		}
+		
+		function sendMsg(x){
+			console.log("Sending Message:"+x);
+			message = new Paho.MQTT.Message(x); 
+			message.destinationName = "/World";
+			client.send(message);
+		}	
+		
+
+		
+</script>
+</head>
+<body onload="initialize()">
+	<a href="javascript:populate();">Populate</a>
+</body>
+</html>
+
+
+

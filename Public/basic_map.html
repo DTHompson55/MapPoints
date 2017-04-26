@@ -17,71 +17,78 @@ html, body {
 	padding: 0;
 }
 </style>
+<script>
+	
+</script>
+<script type="text/javascript" src="path.js"></script>
 <script type="text/javascript" src="scripts/socket.io.min.js"></script>
 <script type="text/javascript" src="scripts/pin_cushion.js"></script>
-<script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-<script	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAn1eiTrucOIwWjPe5rQL8ExfvmFqOhTQs&callback=initMap"
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<script
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAn1eiTrucOIwWjPe5rQL8ExfvmFqOhTQs&callback=initMap"
 	async defer></script>
-
+<script>
+	var initmapvalues = {
+		center : {
+			lat : 43.6607598,
+			lng : -79.3936388
+		},
+		zoom : 20
+	};
+</script>
 
 </head>
 <body>
 	<div id="map"></div>
 	<script>
 		var map;
+		var test_index = 0;
 		function initMap() {
-			map = new google.maps.Map(document.getElementById('map'), {
-				center : {
-					lat : 43.6607598,
-					lng : -79.3936388
-				},
-				//43.6607198,-79.3941388	
-				//43.6607423,-79.3934206
+			map = new google.maps.Map(document.getElementById('map'),
+					initmapvalues);
 
-				zoom : 20
+			google.maps.event.addListener(map, 'click', function(event) {
+				console.log("I = ",test_index,path[test_index]);
+				path[test_index].itemType = "Point";
+				path[test_index].itemId = "P" + path[test_index].id;
+				path[test_index].colorId = 1;
+				parse(path[test_index++]);
 			});
-			parse({id: 1, lat: 43.6607198, lng: -79.3941388, colorId: 1});
-			parse({id: 1, lat: 43.6606198, lng: -79.3941388, colorId: 0});
-
 		}
 	</script>
 
-
 	<script>
-		//var socket = io();
+		var socket = {};//io();
 		$(document).ready(function() {
-	//		socket.on('message', function(msg) {
-	//			parse(msg);
-	//		});
-			
+			//socket.on('message', function(msg) {
+			//	parse(msg);
+			//});
 		});
-		
-		var pin_colors =[
-			"http://www.google.com/mapfiles/markerA.png",
-			"http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-			"http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-			"http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"];
-		
-		function pin_color(i){
-			return pin_colors[i%3];
+
+		var pin_colors = [ "http://www.google.com/mapfiles/markerA.png",
+				"http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+				"http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+				"http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" ];
+
+		function pin_color(i) {
+			return pin_colors[i % 3];
 		}
-		
-		function parse(msg){
-			console.log("The Message Was ", msg);
-			
+
+		function parse(msg) {
+
 			let old_pin = pins.lookup(msg);
-			if (old_pin){
+			if (old_pin) {
 				old_pin.setMap(null);
 			}
 			var marker_pos = new google.maps.LatLng(msg.lat, msg.lng);
-			console.log(marker_pos);
 			var marker = new google.maps.Marker({
 				position : marker_pos,
-				icon: new google.maps.MarkerImage(pin_color(msg.colorId)),
-				title : msg.itemType +" #"+ msg.itemId,  
+				icon : new google.maps.MarkerImage(pin_color(msg.colorId)),
+				title : msg.itemType + " #" + msg.itemId,
 				map : map
 			});
-						
+
 			marker.id = msg.id;
 			pins.put(marker);
 		}

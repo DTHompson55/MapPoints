@@ -1,5 +1,7 @@
 module.exports = {
-	check : check
+	check : check,
+	distance: dist,
+	convert: convert
 }
 
 //
@@ -9,9 +11,15 @@ module.exports = {
 
 const r_to_degree = 180 / Math.PI;
 
+function convert(A){
+	//console.log(A);
+	return {x:A.lat, y:A.lng};
+}
+
 function dist(A, B) {
-	// console.log(Math.pow((A.x - B.x),2));
-	// console.log(Math.pow((A.y - B.y),2));
+//	 console.log(A,B);
+//	 console.log(Math.pow((A.x - B.x),2));
+//	 console.log(Math.pow((A.y - B.y),2));
 
 	return Math.sqrt(Math.pow((A.x - B.x), 2) + Math.pow((A.y - B.y), 2));
 }
@@ -104,7 +112,9 @@ function pointRelation(A, B, C) {
 	return {
 		fits : fits,
 		distance : dx,
-		intersect : xy
+		intersect : xy,
+		distAC: dist(A,C),
+		distBC: dist(B,C)
 	};
 }
 

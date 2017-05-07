@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Animated Map with Dialog</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <style>
+    label, input { display:block; }
+    input.text { margin-bottom:12px; width:95%; padding: .4em; }
+    fieldset { padding:0; border:0; margin-top:25px; }
+    h1 { font-size: 1.2em; margin: .6em 0; }
+    div#users-contain { width: 350px; margin: 20px 0; }
+    div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+    div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+    .ui-dialog .ui-state-error { padding: .3em; }
+    .validateTips { border: 1px solid transparent; padding: 0.3em; }
+  </style>
+  
+  <style>
+/* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#map {
+	height: 100%;
+}
+/* Optional: Makes the sample page fill the window. */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+</style>
+<script>
+var paths = [];
+var path = {index:0, path:[]};
+</script> 
+<!-- <script type="text/javascript" src="path.js"></script  -->
+<script>
+//var tmp = {index:0, path: path};
+//paths.push(tmp);
+</script>
+<script type="text/javascript" src="scripts/socket.io.min.js"></script>
+
+<script type="text/javascript" src="scripts/pin_cushion.js"></script>
+
+<script	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<script src="ajax_helper.js"></script>
+<script	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAn1eiTrucOIwWjPe5rQL8ExfvmFqOhTQs&callback=initMap"
+	async defer></script>
+<script>
+	var initmapvalues = {
+		center : {
+			lat : 43.6607598,
+			lng : -79.3936388
+		},
+		zoom : 20
+	};
+	
+	var lastRoom = "";
+	var start_stop_g;
+	var map;
+	
+	function initMap() {
+		map = new google.maps.Map(document.getElementById('map'),
+				initmapvalues);
+
+		google.maps.event.addListener(map, 'click', function(event) {
+			//console.log(event.latLng.lat(),event.latLng.lng());
+			
+			//start_stop_g();
+			
+			$.post('mouseclick',{lat:event.latLng.lat(),lng:event.latLng.lng()}, function(data){
+				room = JSON.parse(data);
+				document.getElementById('fRoom').value = room.room;
+				if (lastRoom != ""){
+					document.getElementById('tRoom').value = lastRoom;
+				}
+				lastRoom = room.room;
+				
+				//console.log(data);
+				dialog.dialog( "open" ); 
+			
+			});
+		});
+
+	}
+	
+</script>
+
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  
+  <script>
+  var dialog;
+  
+  $( function() {
+    var form,
+ 
+      patient = $( "#patient" ),
+      froom = $( "#fRoom" ),
+      troom = $( "#tRoom" ),
+      pickup = $( "#pickup" ),
+      arrivalTime  = $("#arrivalTime"),
+      allFields = $( [] ).add( patient ).add( froom ).add( troom ).add(pickup).add( arrivalTime ),
+      tips = $( ".validateTips" );
+    
+    start_stop_g = start_stop;
+ 
+    function updateTips( t ) {
+      tips
+        .text( t )
+        .addClass( "ui-state-highlight" );
+      setTimeout(function() {
+        tips.removeClass( "ui-state-highlight", 1500 );
+      }, 500 );
+    }
+ 
+    function checkLength( o, n, min, max ) {
+      if ( o.val().length > max || o.val().length < min ) {
+        o.addClass( "ui-state-error" );
+        updateTips( "Length of " + n + " must be between " +
+          min + " and " + max + "." );
+        return false;
+      } else {
+        return true;
+      }
+    }
+  
+    function scheduleWheelchair() {
+      var valid = true;
+      allFields.removeClass( "ui-state-error" );
+	  
+      var f = {patient: patient.val(),
+    			 froom: froom.val(),
+    			 troom: troom.val(),
+    			 pickup: pickup.val(),
+    			 arrivalTime: arrivalTime.val()
+    			};
+      
+//      valid = valid && checkLength( name, "username", 3, 16 );
+//      valid = valid && checkLength( email, "email", 6, 80 );
+//      valid = valid && checkLength( password, "password", 5, 16 );
+ 
+      if ( valid ) {
+		
+		$.post( "orderDlg", f );
+		
+		dialog.dialog( "close" );
+      }
+      return valid;
+    }
+  
+    dialog = $( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 400,
+      width: 350,
+      modal: true,
+      buttons: {
+        "Submit": scheduleWheelchair,
+        Cancel: function() {
+          dialog.dialog( "close" );
+        }
+      },
+      close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+      }
+    });
+ 
+    form = dialog.find( "form" ).on( "submit", function( event ) {
+      event.preventDefault();
+      scheduleWheelchair();
+    });
+ 
+    var animationCounter = 0;
+	function animate(){
+		animationCounter++;
+		if ( animationCounter > 300){
+			clearInterval(timer);
+			 timer = null;
+			 animationCounter = 0;
+		}
+		for (var i = 0 ; (i < paths.length); i++){
+			
+			path = paths[i];
+			if ( path == null) continue;
+			
+			if (path.index == null){
+				path.index = 0;
+			}
+			//console.log("I =",i, path.path[path.index]);
+			if (path.path[path.index].id == null) path.path[path.index].id = path.index;
+			path.path[path.index].itemType = "Point";
+			path.path[path.index].itemId = "P" + path.path[path.index].id;
+			path.path[path.index].colorId = 5;
+			
+			marker = mark(path.path[path.index]);
+			path.path[path.index].lastMarker = marker;
+			if ( path.index > 0){
+				//console.log("previous mark was ",path.path[path.index].lastMarker);
+				path.path[path.index-1].lastMarker.setMap(null);
+			}
+			path.index++;
+			if ( path.index >= path.path.length){
+				paths[i] = null;
+			} 
+		}			
+	}
+
+	function start_stop(){
+		if ( timer == null) {
+		 timer = setInterval(animate, 1000);
+		 }
+		else {
+		 clearInterval(timer);
+		 timer = null;
+		}
+	}
+		
+	var timer;
+//	var map;
+
+	var pin_colors = [ 
+		["images/blue.png",  "images/blue-A.png",  "images/blue-B.png",  "images/blue-C.png"],
+		["images/green.png", "images/green-A.png", "images/green-B.png", "images/green-C.png"],
+		["images/yellow.png","images/yellow-A.png","images/yellow-B.png","images/yellow-C.png"],
+		["images/red.png",   "images/red-A.png",   "images/red-B.png",   "images/red-C.png"]
+		 ];
+
+	function pin_color(i) {
+		return pin_colors[Math.floor(i/4)][i%4];
+	}
+		
+	function mark(msg) {
+	console.log("Marking This ",msg,map);
+		var marker_pos = new google.maps.LatLng(msg.lat, msg.lng);
+		var marker = new google.maps.Marker({
+			position : marker_pos,
+			icon : new google.maps.MarkerImage(pin_color(msg.colorId)),
+			title : msg.itemType + " #" + msg.itemId,
+			map : map
+		});
+		return marker;
+	}
+	
+	var socket = io();
+
+	socket.on('path', function(data) {
+		var path = {index:0, path:data};
+		paths.push(path);
+		if ( timer == null){
+			start_stop();
+		}
+	});
+
+	socket.on('message', function(data) {
+	console.log("Message was:",data);
+	});
+
+  });
+  
+  
+</script>
+
+</head>
+<body>
+	<div id="map"></div>
+	<div id="dialog-form" title="Schedule Wheelchair">
+  <form>
+    <fieldset>
+     <input class="text ui-widget-content ui-corner-all" value="Patient" id="patient" > 
+     <input class="text ui-widget-content ui-corner-all" value="W101" id="fRoom" >
+     <input class="text ui-widget-content ui-corner-all" value="E132" id="tRoom" >
+     
+     <input name="pickup" type="radio"  value="pickup" id="pickup" checked="checked" >Pickup 
+     <input type="radio" name="pickup" value="dropoff" id="dropoff" >Dropoff
+     <input class="time ui-widget-content ui-corner-all" type="time"  value="16:32:55" id="arrivalTime" >
+     <a href="">+10</a> 
+   
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+</div>
+ 
+
+</body>
+</html>

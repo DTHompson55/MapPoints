@@ -2,31 +2,17 @@ console.log("pins is installed");
 
 var pins = {
 		lookup: function(aPin){
-			for ( let  i = 0 ; i < this.list.length; i++){
-				if ((this.list[i] ) && (this.list[i].id == aPin.id)) return this.list[i];
-			} return null;
-		},
-		find: function(id){
-			for ( let i = 0 ; i < this.list.length; i++){
-				if ((this.list[i] ) && (this.list[i].id == id)) return i;
-			} return -1;
+			if (this.hash[aPin.id]) 
+				return this.hash[aPin.id]
+			return null;
 		},
 		put: function(pin){
-		    let pinId = this.find(pin.id);	
-			if (pinId >= 0){
-				this.list[pinId] = pin;
-			} else {
-				this.list.push(pin);
-			}
+			this.hash[pin.id] = pin;
 		},
 		remove: function(pin){
-		    let pinId = this.find(pin.id);	
-			if (pinId >= 0){
-				delete this.list[pinId];
-			} 
+			delete this.hash[pin.id];
 		},
-
-		list:[]
+		hash: {}
 };
 		
 function pinTester(){
@@ -40,11 +26,12 @@ function pinTester(){
 	pins.put(dPin);
 	pins.remove(bPin);
 	
-	console.log(pins.lookup(aPin), pins.list.length);
-	console.log(pins.lookup(bPin), pins.list.length);
-	console.log(pins.lookup(dPin), pins.list.length);
-	console.log(pins.list);
+	console.log("Pin A = ",pins.lookup(aPin).id == 2, pins.lookup(aPin).body !== "xyzzy");
+	console.log("Pin B = ",pins.lookup(bPin) == null );
+	console.log("Pin C = ",pins.lookup(cPin) !== null , pins.lookup(aPin).body == "xyzzy2");
+	console.log("Pin D = ",pins.lookup(dPin) );
+	console.log(pins.hash);
 }
 
-
+//pinTester();
 		

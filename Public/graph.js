@@ -141,9 +141,9 @@ var graph = {
 						var sid = this.segments.list[i].id;
 						if ((sid.length == 11 ) && (sid.charAt(3) == '1')) continue;
 						var geo = pointChecker.check(this.segments.list[i].a, this.segments.list[i].b, aRoom);
-						// console.log(geo);
+						//console.log(geo);
 						if ( geo.fits ){
-							// console.log("FIT ---");
+							//console.log("FIT ---");
 							if (min.distance > geo.distance){
 								
 								// console.log("The Geo ",geo);
@@ -176,7 +176,11 @@ var graph = {
 				},addCorridors: function(rP){ // takes a list of pointIDs and
 												// connects them as corridors
 					// console.log(rP[0]);
+					var a = this.lookupId(rP[0]);
+					a.type = 'cor';
 					for (var i = 1 ; i < rP.length; i++){
+						var b = this.lookupId(rP[i]);
+						b.type = 'cor';
 						this.connect(this.lookupId(rP[0]), this.lookupId(rP[i]));
 					}
 				},
@@ -244,6 +248,7 @@ var graph = {
 			var path = paths[imin].path;
 			for (var i = 0 ; i < path.length; i++){
 				var point = this.lookupId(path[i]);
+				point.iteration = i;
 				path[i] = point;
 			}
 			return path;
@@ -260,12 +265,16 @@ var graph = {
 				}
 			return null;
 			},
-			timeSeries(path ,stepSize) {
-				var dist = 0;
-				for (var i = 0 ; i < path.length; i++){
-					if (path[i].distance)
-					dist += path[i].distance;
-				}
+		timeSeries(originalPath ,stepSize) {
+			path = []; // make a copy of the important parts of the original path
+			for (var i = 0 ; i < originalPath.length; i++){
+			  path.push({id:i, lat:originalPath[i].lat,lng:originalPath[i].lng,distance:originalPath[i].distance});
+			}
+			var dist = 0;
+			for (var i = 0 ; i < path.length; i++){
+				if (path[i].distance)
+				dist += path[i].distance;
+			}
 		stepSize = stepSize || 0.0001;
 		var floatfix = 0.000001;
 		var maxSteps = Math.ceil(dist/stepSize)+1;
@@ -288,11 +297,11 @@ var graph = {
 				var partialStep = (stepSize - dPrev); // this is how much of the step hangs into this segment
 				
 				var stepPoint = {};
-				console.log("B",i,stepCount,dCurrent,dSegment,partialStep,partialStep/dSegment);
+				//console.log("B",i,stepCount,dCurrent,dSegment,partialStep,partialStep/dSegment);
 				stepPoint.x = path[i].lat+((path[i+1].lat-path[i].lat)*((partialStep/dSegment)));
 				stepPoint.y = path[i].lng+((path[i+1].lng-path[i].lng)*((partialStep/dSegment)));
 
-				stepPath.push({id: stepCount,lat:stepPoint.x,lng:stepPoint.y});
+				stepPath.push({id: stepCount,lat:stepPoint.x,lng:stepPoint.y, i: i});
 				stepCount++;
 
 				path[i].lat = stepPoint.x; // muddle the current point in the array to be the 
@@ -302,14 +311,17 @@ var graph = {
 				dPrev = 0;
 				dCurrent = 0;
 
-				if (stepCount > maxSteps) break; // failsafe
 			} else {
 				dPrev = dCurrent; // if we didn't take a step, then update previous distance traveled for next inteation
 			}
-			if (stepCount > maxSteps) break;
 		}
 		// add the last point to the time Series
 		stepPath.push({id: stepCount+1,lat:path[path.length-1].lat,lng:path[path.length-1].lng});
+		
+		for (var i = 1 ; i < stepPath.length; i++){
+			stepPath[i].distance = this.distance(stepPath[i-1],stepPath[i]);
+		}
+		
 		return stepPath;
 		},
 

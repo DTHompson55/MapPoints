@@ -212,11 +212,20 @@ var graph = {
  						 this.setPointsFromSegment(this.segments.list[i]);
 					}
 				},
-		fromHereToThere: function (x, y){
+		fromName1ToName2: function (x, y){ // works with IDs of locations
 			// console.log("Segments are ",this.segments);
-			var paths = [];
 			let a = this.lookupId(x);
 			let b = this.lookupId(y);
+			return this.fromPointA_PointB(a,b);
+		},
+		fromHereToThere: function (x, y){ // works with IDs of locations
+			// console.log("Segments are ",this.segments);
+			let a = this.lookupId(x);
+			let b = this.lookupId(y);
+			return this.fromPointA_PointB(a,b);
+		},
+		fromPointA_PointB: function(a,b){	// works with Points of locations
+			var paths = [];
 			// console.log("from here a ",x,a);
 			// console.log("from here b ",7,b);
 			this.navigate(a,b,[],[],paths);
@@ -268,7 +277,15 @@ var graph = {
 		timeSeries(originalPath ,stepSize) {
 			path = []; // make a copy of the important parts of the original path
 			for (var i = 0 ; i < originalPath.length; i++){
-			  path.push({id:i, lat:originalPath[i].lat,lng:originalPath[i].lng,distance:originalPath[i].distance});
+			  path.push({id:i, 
+				  lat:originalPath[i].lat,
+				  lng:originalPath[i].lng,
+				  distance:originalPath[i].distance,
+				  has:originalPath[i].has,
+				  name:originalPath[i].name,
+				  room:originalPath[i].room,
+				  connections:originalPath[i].connections,
+				  hash:originalPath[i].connections});
 			}
 			var dist = 0;
 			for (var i = 0 ; i < path.length; i++){
@@ -316,12 +333,16 @@ var graph = {
 			}
 		}
 		// add the last point to the time Series
-		stepPath.push({id: stepCount+1,lat:path[path.length-1].lat,lng:path[path.length-1].lng});
+		stepPath.push({id: stepCount+1,
+			lat:path[path.length-1].lat,
+			lng:path[path.length-1].lng, 
+			name:path[path.length-1].name,
+			lastOne:"LastOne"});
 		
 		for (var i = 1 ; i < stepPath.length; i++){
 			stepPath[i].distance = this.distance(stepPath[i-1],stepPath[i]);
 		}
-		
+				
 		return stepPath;
 		},
 

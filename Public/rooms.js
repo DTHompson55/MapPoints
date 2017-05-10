@@ -1,11 +1,20 @@
 module.exports = {getRooms: getRooms,
 		specialRooms: getSpecialRooms,
 		find: find,
-		findIndex, findIndex
+		findIndex, findIndex,
+		getWaitLocation: getWaitLocation
 		};
 
 function find(name){
 	return hash[name];
+}
+
+
+function getWaitLocation(id){
+	var name = "W"+(id+1);
+	var tmp = findIndex(name);
+	//console.log("Get WAIT loc ", id, name, tmp);
+	return tmp;
 }
 
 function findIndex(name){
@@ -64,7 +73,7 @@ var rooms = [
 {room: "W115", lat:  43.66104564133785 , lng: -79.39389377832413, type: 'room' },
 {room: "W116", lat:  43.660888468049215 , lng: -79.3938535451889, type: 'room' },
 {room: "W117", lat:  43.660886527635675 , lng: -79.39369797706604, type: 'room' },
-{room: "W118", lat:  43.66095444207233 , lng: -79.39339756965637, type: 'room' },
+{room: "Reception", lat:  43.66095444207233 , lng: -79.39339756965637, type: 'room' },
 {room: "E101", lat:  43.66087391494612 , lng: -79.392881244421, type: 'room' },
 {room: "E102", lat:  43.66085160018119 , lng: -79.39288794994354, type: 'room' },
 {room: "E103", lat:  43.66083607686157 , lng: -79.39292684197426, type: 'room' },
@@ -192,7 +201,12 @@ var rooms = [
 {room: "M105", lat: 43.660789506878615 , lng: -79.39378246665001  , type: 'room' },
 {room: "M106", lat: 43.66079144729528 , lng: -79.39368858933449  , type: 'room' },
 {room: "M107", lat: 43.66078271541974 , lng: -79.39384013414383  , type: 'room' },
-{room: "M108", lat: 43.66071383057926 , lng: -79.3938159942627  , type: 'room'}
+{room: "M108", lat: 43.66071383057926 , lng: -79.3938159942627  , type: 'room'},
+
+{room:"W1", lat: 43.66097093556677 , lng: -79.39342841506004 , type: 'wait'},
+{room:"W2", lat: 43.66098063762021 , lng: -79.39340025186539 , type: 'wait'},
+{room:"W3", lat: 43.660983548235954 , lng: -79.39337342977524 , type: 'wait'},
+{room:"W4", lat: 43.660993250287355 , lng: -79.39334660768509 , type: 'wait'}
 
 ];
 

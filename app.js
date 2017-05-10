@@ -17,42 +17,46 @@
 'use strict';
 
 var  mapGeometry = require('./Public/mapGeometry.js');
+var roomUtil = require('./Public/rooms.js');
 
 var express = require('express'); // app server
-var bodyParser = require('body-parser'); // parser for post requests																		// sdk
+var bodyParser = require('body-parser'); // parser for post requests // sdk
 
 var app = express();
 
 // Bootstrap application settings
 app.use(express.static('./public')); // load UI from public folder
-//configure the app to use bodyParser()
+// configure the app to use bodyParser()
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 
-var socketClient;
-app.registerSocketClient = function(client){
-	//console.log("register client in app",client);
-	socketClient = client;
-	console.log("socket  connected!");
-	client.emit('message', 'socket connected');
+var wheelChairNumber = -1;
 
-	client.on('message', function(message){
-    	console.log('socket message :');//,message);
-	});
-
-    client.on('disconnect', function() {
-		console.log("socket disconnect");
-		socketClient = null;
-    });
+function schedule(wheelChairNumber, path){
+	console.log("Schedule", path[0]);
+ if ( socketClient ){
+	 socketClient.emit('Path', {wheelChairNumber: wheelChairNumber, path:path});
+ }	
 }
 
+//
+// Where the Server keeps track of state and state changes
+//
+var states = 
+	[
+	{wheelChairNumber:0, state:'idle', lastLoc: "W1", waitLoc: "W1"},
+	{wheelChairNumber:1, state:'idle', lastLoc: "W2", waitLoc: "W2"},
+	{wheelChairNumber:2, state:'idle', lastLoc: "W3", waitLoc: "W3"},
+	{wheelChairNumber:3, state:'idle', lastLoc: "W4", waitLoc: "W4"},
+	];
 
-function schedule(path, params){
-	console.log("Schedule",path);
+function stateChange(wheelChairNumber, state){
+	// console.log("Schedule",path);
+	states[wheelChairNumber].state = state;
  if ( socketClient ){
-	 socketClient.emit('path', path);
+	 socketClient.emit('StateChange', {wheelChairNumber: wheelChairNumber, state: state});
  }	
 }
 
@@ -62,18 +66,26 @@ app.post('/mouseclick',
 		var workspace = process.env.WORKSPACE_ID || '<workspace-id>';
 
 		var closest = mapGeometry.getClosestRoom(req.body);
-		//return res.status(err.code || 500).json(err);
+		// return res.status(err.code || 500).json(err);
 		res.send(JSON.stringify(closest));
 
 	});
 
+
 app.post('/orderDlg',
 		function(req, res) {
+	
+			wheelChairNumber++;
+			wheelChairNumber %= 3;
+	
 			var workspace = process.env.WORKSPACE_ID || '<workspace-id>';
-			var path = mapGeometry.getRoomPath(req.body.froom, req.body.troom);
-			schedule(path, req.body);
+			var path = mapGeometry.getRoomPath(states[wheelChairNumber].waitLoc, req.body.froom, req.body.troom);
+			schedule(wheelChairNumber, path);
+			stateChange(wheelChairNumber, 'good');	
+
 			res.send(JSON.stringify({"retval": path != null}));
 		});
+
 
 var socketClient;
 app.registerSocketClient = function(client){
@@ -82,9 +94,24 @@ app.registerSocketClient = function(client){
 	client.emit('message', 'socket connected');
 
 	client.on('message', function(message){
-    	console.log('socket message :');//,message);
+    	console.log('socket message :');// ,message);
 	});
-
+	
+	client.on('arrived', function(message){
+		stateChange(message.wheelChairNumber, 'idle');
+		if ( states[message.wheelChairNumber].lastLoc == states[message.wheelChairNumber].waitLoc)
+			return;
+		
+		var path = mapGeometry.getReturnPath(states[message.wheelChairNumber].lastLoc, states[message.wheelChairNumber].waitLoc);
+		schedule(message.wheelChairNumber, path);
+		
+	});
+	
+	client.on('location', function(message){
+		// console.log("location", message);
+		states[message.wheelChairNumber].lastLoc = message.lastLoc.name;
+	});
+		
     client.on('disconnect', function() {
 		console.log("socket disconnect");
     });

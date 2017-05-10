@@ -1,7 +1,8 @@
 module.exports = {
 		init:init,
 		getClosestRoom:getClosestRoom,
-		getRoomPath:getRoomPath
+		getRoomPath:getRoomPath,
+		getReturnPath: getReturnPath
 }
 
 var graph = require('./graph.js').getGraph();
@@ -19,6 +20,7 @@ var fs = require('fs');
 function getClosestRoom(aPoint){
 	var min = {distance: 1, index: 0};
 	for (var i = 0 ; i < rooms.length; i++){
+		if ( rooms[i].type == 'wait' ) continue;
 		var d = util.distance(util.convert(aPoint), util.convert(rooms[i]));
 		//console.log(i,d,min);
 		if ( d < min.distance){
@@ -32,14 +34,31 @@ function getClosestRoom(aPoint){
 //
 //returns the closest room to the point given
 //
-function getRoomPath(roomNameA, roomNameB){
+function getRoomPath(startRoom, roomNameA, roomNameB){
+	var s = roomUtil.findIndex(startRoom);
 	var a = roomUtil.findIndex(roomNameA);
 	var b = roomUtil.findIndex(roomNameB);
-	console.log(roomNameA, a, roomNameB, b);
-	var path = graph.fromHereToThere(a,b);
+//	console.log(roomNameA, a, roomNameB, b);
+	var path1 = graph.fromHereToThere(s,a);
+	var path2 = graph.fromHereToThere(a,b);
+
+	var path = path1.concat(path2);
+	//console.log("Room Path is ",path);
+	var stepPath = graph.timeSeries(path, 0.00005);
+	//console.log("Step Path is ",stepPath);
+	return stepPath;
+}
+//
+//returns the closest room to the point given
+//
+function getReturnPath(nameA, nameB){
+//	console.log(roomNameA, a, roomNameB, b);
+	var path = graph.fromHereToThere(roomUtil.findIndex(nameA), roomUtil.findIndex(nameB));
 	var stepPath = graph.timeSeries(path, 0.00005);
 	return stepPath;
 }
+
+
 //
 //
 //

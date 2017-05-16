@@ -256,7 +256,7 @@ var graph = {
 			//
 			var path = paths[imin].path;
 			for (var i = 0 ; i < path.length; i++){
-				var point = this.lookupId(path[i]);
+				var point = JSON.parse(JSON.stringify(this.lookupId(path[i]))); // clone the old point
 				point.iteration = i;
 				path[i] = point;
 			}
@@ -280,13 +280,14 @@ var graph = {
 			  path.push({id:i, 
 				  lat:originalPath[i].lat,
 				  lng:originalPath[i].lng,
+				  event:originalPath[i].event,
 				  distance:originalPath[i].distance,
 				  has:originalPath[i].has,
 				  name:originalPath[i].name,
 				  room:originalPath[i].room,
 				  connections:originalPath[i].connections,
 				  hash:originalPath[i].connections});
-			}
+			  }
 			var dist = 0;
 			for (var i = 0 ; i < path.length; i++){
 				if (path[i].distance)
@@ -297,7 +298,7 @@ var graph = {
 		var maxSteps = Math.ceil(dist/stepSize)+1;
 		var stepCount = 1;
 		var stepPath= [];
-		stepPath.push({id:0, lat:path[0].lat,lng:path[0].lng});
+		//stepPath.push({id:0, lat:path[0].lat,lng:path[0].lng, event:path[0].event});
 		
 		var dPrev = 0     // accumlated distance of previous points up to the
 							// current
@@ -305,6 +306,16 @@ var graph = {
 		var dCurrent = 0; // accumulated distance of current
 		
 		for (var i = 0 ; i < path.length-1 ; i++){
+			if ( path[i].event ){
+				//
+				// if we hit a midpoint, set the event marker and start a new leg of the journey
+				//
+				stepPath.push({id:i, lat:path[i].lat,lng:path[i].lng, event:path[i].event});
+				dCurrent = 0;
+				dPrev = 0;
+				continue; 
+			}
+			
 			var dSegment = this.distance(path[i], path[i+1]);       // distance for this segment
 			dCurrent += dSegment;                                   // accumulated distance of all segments
 			if ( dCurrent  > stepSize ){ // if the traveled distance is more
@@ -337,6 +348,7 @@ var graph = {
 			lat:path[path.length-1].lat,
 			lng:path[path.length-1].lng, 
 			name:path[path.length-1].name,
+			event:path[path.length-1].event,
 			lastOne:"LastOne"});
 		
 		for (var i = 1 ; i < stepPath.length; i++){

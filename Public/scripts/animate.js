@@ -42,7 +42,7 @@ function animate(){
 			wheelChairNumber:path.wheelChairNumber, 
 			lastLoc:path.path[path.index]});				
 
-		path.path[path.index].lastMarker = marker;
+		//path.path[path.index].lastMarker = marker;
 		if (states[path.wheelChairNumber].lastMarker){
 			// console.log("previous mark was
 			// ",path.path[path.index].lastMarker);
@@ -50,11 +50,15 @@ function animate(){
 			states[path.wheelChairNumber].lastMarker.setMap(null);
 		}
 		states[path.wheelChairNumber].lastMarker = marker;
+		if (path.path[path.index].event){
+			console.log("An Event",path.path[path.index].event,path.wheelChairNumber);
+			socket.emit(path.path[path.index].event,{wheelChairNumber:path.wheelChairNumber});				
+			states[path.wheelChairNumber].lastEvent = path.path[path.index].event;
+		}
 		
 		path.index++;
 		if ( path.index >= path.path.length){
 			paths[i] = null;
-			socket.emit("arrived",{wheelChairNumber:path.wheelChairNumber});				
 		} 
 	}			
 }
@@ -82,7 +86,7 @@ function getColor(wheelChairNumber) {
 	if (states[wheelChairNumber].state == 'idle') i = 0;
 	if (states[wheelChairNumber].state == 'good') i = 1;
 	if (states[wheelChairNumber].state == 'warn') i = 2;
-	if (states[wheelChairNumber].state == 'bad')  i = 3;
+	if (states[wheelChairNumber].state == 'stop') i = 3;
 	
 	//console.log("Get Color is",wheelChairNumber,states[wheelChairNumber].state,i);
 	return pin_colors[i][wheelChairNumber+1];

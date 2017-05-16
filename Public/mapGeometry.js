@@ -40,7 +40,19 @@ function getRoomPath(startRoom, roomNameA, roomNameB){
 	var b = roomUtil.findIndex(roomNameB);
 //	console.log(roomNameA, a, roomNameB, b);
 	var path1 = graph.fromHereToThere(s,a);
+	path1[0].event = "toPickup";
+	path1[path1.length-1].event = "atPickup";
+	console.log(path1.length, path1[path1.length-1]);
+	
 	var path2 = graph.fromHereToThere(a,b);
+	console.log(path1.length, path1[path1.length-1].event,path2.length, path2[path2.length-1].event);
+
+	path2[0].event = "toDropoff";
+	console.log(path1.length, path1[path1.length-1],path2.length, path2[path2.length-1].event);
+
+	path2[path2.length-1].event = "atDropoff";
+	
+	console.log(path1.length, path1[path1.length-1].event);
 
 	var path = path1.concat(path2);
 	//console.log("Room Path is ",path);
@@ -54,6 +66,9 @@ function getRoomPath(startRoom, roomNameA, roomNameB){
 function getReturnPath(nameA, nameB){
 //	console.log(roomNameA, a, roomNameB, b);
 	var path = graph.fromHereToThere(roomUtil.findIndex(nameA), roomUtil.findIndex(nameB));
+	path[0].event = "toWaitLoc";
+	path[path.length-1].event = "atWaitLoc";
+
 	var stepPath = graph.timeSeries(path, 0.00005);
 	return stepPath;
 }

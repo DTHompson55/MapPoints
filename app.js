@@ -52,8 +52,15 @@ var states =
 	{wheelChairNumber:3, state:'idle', lastLoc: "W4", waitLoc: "W4"},
 	];
 
+//
+//if (states[wheelChairNumber].state == 'idle') i = 0;
+//if (states[wheelChairNumber].state == 'good') i = 1;
+//if (states[wheelChairNumber].state == 'warn') i = 2;
+//if (states[wheelChairNumber].state == 'stop') i = 3;
+//
+
 function stateChange(wheelChairNumber, state){
-	// console.log("Schedule",path);
+	//console.log("",path);
 	states[wheelChairNumber].state = state;
  if ( socketClient ){
 	 socketClient.emit('StateChange', {wheelChairNumber: wheelChairNumber, state: state});
@@ -96,15 +103,23 @@ app.registerSocketClient = function(client){
 	client.on('message', function(message){
     	console.log('socket message :');// ,message);
 	});
+
+	client.on('atDropoff',  function(message){console.log(message,"at Dropoff");stateChange(message.wheelChairNumber,'stop');});
+	client.on('toDropoff',  function(message){console.log(message,"to Dropoff");stateChange(message.wheelChairNumber,'good');});
+	client.on('toPickup',   function(message){console.log(message,"to Pickup");stateChange(message.wheelChairNumber,'good');});
+	client.on('atPickup',   function(message){console.log(message,"at Pickup");stateChange(message.wheelChairNumber,'stop');});
+	client.on('toWaitLoc',  function(message){console.log(message,"to WaitLoc");stateChange(message.wheelChairNumber,'idle');});
+	client.on('atWaitLoc',  function(message){console.log(message,"at WaitLoc");stateChange(message.wheelChairNumber,'idle');});
 	
-	client.on('arrived', function(message){
-		stateChange(message.wheelChairNumber, 'idle');
+	client.on('atDropoff', function(message){
+		//
+		// This seems a bit strange... this stops the wheelchair from moving after the last location...
+		//
 		if ( states[message.wheelChairNumber].lastLoc == states[message.wheelChairNumber].waitLoc)
 			return;
 		
 		var path = mapGeometry.getReturnPath(states[message.wheelChairNumber].lastLoc, states[message.wheelChairNumber].waitLoc);
-		schedule(message.wheelChairNumber, path);
-		
+		schedule(message.wheelChairNumber, path);		
 	});
 	
 	client.on('location', function(message){

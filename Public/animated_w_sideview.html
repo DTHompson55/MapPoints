@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Animated Map with </title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet"
+	href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="stylesheets/style.css">
+
+<style>
+/* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#map {
+	height: 700px;
+	width: 100%;
+	left: 0;
+}
+/* Optional: Makes the sample page fill the window. */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+</style>
+<script>
+	
+</script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- <script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+ 
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+-->
+
+<script type="text/javascript" src="scripts/socket.io.min.js"></script>
+<script type="text/javascript" src="scripts/pin_cushion.js"></script>
+<script type="text/javascript" src="scripts/map.js"></script>
+<script type="text/javascript" src="scripts/animate.js"></script>
+<script type="text/javascript" src="scripts/socket_impl.js"></script>
+
+<script src="ajax_helper.js"></script>
+<script
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAn1eiTrucOIwWjPe5rQL8ExfvmFqOhTQs&callback=initMap"
+	async defer></script>
+
+<script>
+	$(function() {
+		var form, patient = $("#patient"), froom = $("#fRoom"), troom = $("#tRoom"), pickup = $("#pickup"), arrivalTime = $("#arrivalTime"), allFields = $(
+				[]).add(patient).add(froom).add(troom).add(pickup).add(
+				arrivalTime), tips = $(".validateTips");
+
+		start_stop_g = start_stop;
+
+		function updateTips(t) {
+			tips.text(t).addClass("ui-state-highlight");
+			setTimeout(function() {
+				tips.removeClass("ui-state-highlight", 1500);
+			}, 500);
+		}
+
+		function checkLength(o, n, min, max) {
+			if (o.val().length > max || o.val().length < min) {
+				o.addClass("ui-state-error");
+				updateTips("Length of " + n + " must be between " + min
+						+ " and " + max + ".");
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		function scheduleWheelchair() {
+			var valid = true;
+			allFields.removeClass("ui-state-error");
+
+			var f = {
+				patient : patient.val(),
+				froom : froom.val(),
+				troom : troom.val(),
+				pickup : pickup.val(),
+				arrivalTime : arrivalTime.val()
+			};
+
+			//      valid = valid && checkLength( name, "username", 3, 16 );
+
+			if (valid) {
+				$.post("orderDlg", f); // there will be a socket response with a path
+				dialog.dialog("close");
+			}
+			return valid;
+		}
+
+		dialog = $("#dialog-form").dialog({
+			autoOpen : false,
+			height : 400,
+			width : 350,
+			modal : true,
+			buttons : {
+				"Submit" : scheduleWheelchair,
+				Cancel : function() {
+					dialog.dialog("close");
+				}
+			},
+			close : function() {
+				form[0].reset();
+				allFields.removeClass("ui-state-error");
+			}
+		});
+
+		//
+		// I'm not sure what this is doing, if the submit button is already defined in the previous
+		//
+		form = dialog.find("form").on("submit", function(event) {
+			event.preventDefault();
+			scheduleWheelchair();
+		});
+	});
+</script>
+
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-10">
+			<div id="map"></div>
+			</div>
+			<div class="col-xs-2">
+			<p>WhC 01 - Idle</p>
+			<p>WhC 02 - Idle</p>
+			<p>WhC 03 - Idle</p>
+			<p>WhC 04 - Offline</p>
+			<!-- Dialog Definition  -->
+<div id="dialog-form" title="Schedule Wheelchair">
+  <form>
+    <fieldset>
+     <input class="text ui-widget-content ui-corner-all" value="Patient" id="patient" > 
+     <input class="text ui-widget-content ui-corner-all" value="W101" id="fRoom" >
+     <input class="text ui-widget-content ui-corner-all" value="E132" id="tRoom" >
+     
+     <input name="pickup" type="radio"  value="pickup" id="pickup" checked="checked" >Pickup 
+     <input type="radio" name="pickup" value="dropoff" id="dropoff" >Dropoff
+     <input class="time ui-widget-content ui-corner-all" type="time"  value="16:32:55" id="arrivalTime" >
+     <a href="">+10</a> 
+   
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+</div>
+			
+			</div>
+		</div>
+	</div>
+
+
+
+</body>
+</html>

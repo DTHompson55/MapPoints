@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Animated Map with Dialog</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="scripts/socket.io.min.js"></script>
+<script type="text/javascript" src="scripts/pin_cushion.js"></script>
+<script type="text/javascript" src="scripts/map.js"></script>
+<script type="text/javascript" src="scripts/animate.js"></script>
+<script type="text/javascript" src="scripts/socket_impl.js"></script>
+
+<script src="ajax_helper.js"></script>
+<script
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAn1eiTrucOIwWjPe5rQL8ExfvmFqOhTQs&callback=initMap"
+	async defer></script>
+
+
+</head>
+
+<body>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-2">
+			<p>hello asdf</p>
+			</div>
+			<div class="col-xs-2">
+				<h3 id="selectedLanguage">English2</h3>
+			</div>
+		</div>
+		<div class="row">
+			<hr>
+		</div>
+		<div class="row">
+			<div class="col-xs-2">
+			<p>hello 1</p>
+			</div>
+			<div class="col-xs-2">
+			<p>hello 2</p>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<script>
+	$(document).ready(
+			function() {
+				
+				for (var i = 0; i < languages.length; i++) {
+					
+					$("#X").append(
+							'<a href="javascript:selectLanguage(\''
+									+ languages[i] + '\');">' + languages[i]
+									+ '</a>');
+				}
+	
+		for (var i = 0; i < messages.length; i++) {
+			
+			$("#col1").append(
+					'<div id="col1"><button onclick="javascript:sayIt('+(i+1)+');">'+messages[i].key+'</button></div>');
+		}
+	});
+
+</script>
+
+</html>
